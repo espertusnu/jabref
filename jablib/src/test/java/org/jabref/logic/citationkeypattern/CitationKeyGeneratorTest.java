@@ -15,6 +15,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.CsvSource;
+import org.junit.jupiter.params.provider.EmptySource;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.Answers;
 
@@ -207,14 +208,30 @@ class CitationKeyGeneratorTest {
         assertEquals(expectedResult, cleanedKey);
     }
 
+    @ParameterizedTest
+    @MethodSource
+    void firstAuthorBibEntry(String expected, BibEntry bibEntry) {
+        assertEquals(expected, generateKey(bibEntry, "[auth]"));
+    }
+
+    static Stream<Arguments> firstAuthorBibEntry() {
+        return Stream.of(
+                Arguments.of("Newton", AUTHOR_FIRSTNAME_INITIAL_LASTNAME_FULL_COUNT_5),
+                Arguments.of("Newton", AUTHOR_FIRSTNAME_INITIAL_LASTNAME_FULL_COUNT_1)
+        );
+    }
+
+    @ParameterizedTest
+    @CsvSource(quoteCharacter = '"', textBlock = """
+            #  https://sourceforge.net/forum/message.php?msg_id=4498555
+            Koening, K{\\"o}ning
+            """)
+    void firstAuthorString(String expected, String author) {
+        assertEquals(expected, generateKey(createABibEntryAuthor(author), "[auth]"));
+    }
+
     @Test
-    void firstAuthor() {
-        assertEquals("Newton", generateKey(AUTHOR_FIRSTNAME_INITIAL_LASTNAME_FULL_COUNT_5, "[auth]"));
-        assertEquals("Newton", generateKey(AUTHOR_FIRSTNAME_INITIAL_LASTNAME_FULL_COUNT_1, "[auth]"));
-
-        // https://sourceforge.net/forum/message.php?msg_id=4498555
-        assertEquals("Koening", generateKey(createABibEntryAuthor("K{\\\"o}ning"), "[auth]"));
-
+    void firstAuthorStringEmpty() {
         assertEquals("", generateKey(createABibEntryAuthor(""), "[auth]"));
     }
 
